@@ -1,0 +1,41 @@
+#Definir el callback
+callbacks = [EarlyStopping(monitor='val_accuracy', patience=2, restore_best_weights=True)]
+
+#Entrenamiento de la Red Neuronal Convolucional
+cnn.fit(imagen_fit, batch_size=batch_size, epochs=epochs, verbose = 1,
+                    callbacks=callbacks, validation_data=imagen_val,
+                    steps_per_epoch=pasos, validation_steps=pasos_val)
+
+#Guardar modelo en un archivo
+dir = './modelo/'
+
+if not os.path.exists(dir):
+    os.mkdir(dir)
+    
+model.save('./modelo/modelo.h5')
+model.save_weights('./modelo/pesos.h5')
+
+#Clasificar imagenes 
+import numpy as np
+from keras.preprocessing.image import load_img, img_to_array
+
+def predict(file):
+  x = load_img(file, target_size=(altura, longitud))
+  x = img_to_array(x)
+  x = np.expand_dims(x, axis=0)
+  arreglo = cnn.predict(x) #[[1,0,0]]
+  resultado = arreglo[0]   #[0,0,1]
+  respuesta = np.argmax(resultado)  #0
+  print(resultado)
+  if respuesta==0:
+    print('Normal')
+  else:
+    print('Pneumonia')
+
+  return respuesta
+
+#Caso neumonia
+predict('./data/test/PNEUMONIA/person1_virus_6')
+
+#Caso sin neumonia
+predict('./data/test/NORMAL/IM-0001-0001')
